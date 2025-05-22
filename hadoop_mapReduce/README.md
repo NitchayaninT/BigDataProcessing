@@ -24,7 +24,7 @@
 ``` Then i changed to work inside the namenode container so that it's easier to run linux commands : docker exec -it namenode bash ```
 ``` Compile : jar cf WordCount.jar WordCount*.class ```
 
-### 5.Make input directory and put Alice.txt and words.txt there (i’m still running inside the docker)
+### 5.Make input directory and put Alice.txt and words.txt in hadoop fs (run from docker)
 ``` hdfs dfs -mkdir -p /input ```
 ``` hdfs dfs -put words.txt /input/ ```
 ``` hdfs dfs -put Alice.txt /input/ ```
