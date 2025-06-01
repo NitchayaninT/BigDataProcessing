@@ -77,13 +77,66 @@ Let’s say you want to read a 256 MB file split into 2 blocks (128 MB each), st
         
 4. Reads both blocks and reconstructs the file.
 ### Commands in Hadoop
-`hadoop fs mkdir /user/<user_name>` : make directory in hadoop fs
+`hadoop fs mkdir /user/<user_name>` : make directory in hadoop fs   
+
 `hadoop fs -moveFromLocal Orangecat.jpeg ./` : move file from local (container/bucket) to hadoop fs (different layers)
+
 `hadoop fs -ls` : list file/directories in hadoop fs
+
 `hadoop fs -du` : see size of all replica
+
 `hadoop fs -mv from.txt out/to.txt`: move from.txt file to location out/to.txt
+
 `hadoop fs -touch file.txt` : create file in hadoop fs
+
 `hadoop fs -copyFromLocal file /` : copy file from local -> hdfs
+
 `hadoop fs -copytoLocal file /`: copy a file from hdfs -> local
+
 `hadoop fs -cat file | tail 4` : reading the bottom file
+
 `hadoop fs -cat file | head 4` : read the top of the file
+
+### Steps to upload OUR file to hadoop fs
+1. Install Docker/ Docker Desktop 
+
+2. Pull Docker image (You can use other option too)
+
+```
+docker pull bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
+docker pull bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
+``` 
+3.Start hadoop network and run both namenode and datanode
+```
+docker network create hadoop
+docker run -d --net hadoop --name namenode \
+ -e CLUSTER_NAME=test \
+  -p 9870:9870 \
+  bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8 
+docker run -d --net hadoop --name datanode \
+  -e CORE_CONF_fs_defaultFS=hdfs://namenode:8020 \
+  -e CLUSTER_NAME=test \
+  bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
+```
+
+4. Access hdfs
+Use docker exec -it namenode command to access hdfs command
+For example
+```
+docker exec -it namenode hdfs dfs -ls /
+docker exec -it namenode hdfs dfs -mkdir /test
+docker exec -it namenode hdfs dfs -ls /
+```
+
+5. Copy our file into docker → copy file.txt to namenode 
+``` docker cp file.txt  namenode:/tmp/file.txt  ```
+
+6. Copy/move your file into hdfs  → local name node
+```
+docker exec -it namenode  hdfs dfs -moveFromLocal tmp/file.txt /test/
+docker exec -it namenode hdfs dfs -ls /test/
+```
+
+7. Use Orangecat.jpeg
+8. Use -copyToLocal or -moveToLocal or -get to move file out of hdfs 
+
